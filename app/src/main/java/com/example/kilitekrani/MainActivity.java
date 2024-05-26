@@ -1,20 +1,17 @@
 package com.example.kilitekrani;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.android.material.button.MaterialButton;
-
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
@@ -26,11 +23,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-        Random random = new Random();
-        int color = Color.argb(255, random.nextInt(256), random.nextInt(256), random.nextInt(256));
-        getWindow().getDecorView().setBackgroundColor(color);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -47,6 +39,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         enable.setOnClickListener(this);
         disable.setOnClickListener(this);
         pattern.setOnClickListener(this);
+
+        // Rastgele bir arkaplan rengi belirleyin
+        int color = ColorRandomizer.rastgeleRenkOlustur();
+        getWindow().getDecorView().setBackgroundColor(color);
 
         updateAdminButtonsVisibility();
     }
