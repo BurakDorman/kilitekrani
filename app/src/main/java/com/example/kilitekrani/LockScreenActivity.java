@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
@@ -12,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
-import com.example.kilitekrani.PatternView;
 
 public class LockScreenActivity extends AppCompatActivity {
 
@@ -50,20 +50,23 @@ public class LockScreenActivity extends AppCompatActivity {
         textViewNotifications = findViewById(R.id.textViewNotifications);
 
         updateTimeAndDate();
-
     }
+
     @Override
     public void onBackPressed() {
         //super.onBackPressed();
     }
+
     private void checkPattern(String pattern) {
         if (pattern.equals(savedPattern)) {
             Toast.makeText(this, "Desen doğru. Ekran kilidi açılıyor...", Toast.LENGTH_SHORT).show();
             finish();
         } else {
             Toast.makeText(this, "Yanlış desen. Tekrar deneyin.", Toast.LENGTH_SHORT).show();
+            patternView.clearPattern();
         }
     }
+
     private void updateTimeAndDate() {
         SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy, EEEE", Locale.getDefault());
@@ -74,6 +77,7 @@ public class LockScreenActivity extends AppCompatActivity {
         textViewTime.setText(currentTime);
         textViewDate.setText(currentDate);
     }
+
     private int getBackgroundColorForDay(int dayOfWeek) {
         switch (dayOfWeek) {
             case Calendar.MONDAY:
@@ -91,8 +95,7 @@ public class LockScreenActivity extends AppCompatActivity {
             case Calendar.SUNDAY:
                 return ContextCompat.getColor(this, R.color.colorSunday);
             default:
-                return Color.WHITE; // Varsayılan olarak beyaz renk
+                return Color.WHITE;
         }
     }
 }
-

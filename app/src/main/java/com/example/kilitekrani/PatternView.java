@@ -4,48 +4,74 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PathEffect;
+import android.graphics.drawable.Drawable;
+import android.graphics.DashPathEffect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+
+import androidx.core.content.ContextCompat;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class PatternView extends View {
 
     private static final int GRID_SIZE = 3;
-    private static final int POINT_RADIUS = 30;
+    private static final int ICON_SIZE = 100;
     private static final int LINE_WIDTH = 10;
 
     private Paint paint;
     private List<Point> points;
     private List<Point> selectedPoints;
+    private Drawable[] fruitIcons;
+    private int[] fruitIndex;
     private Path path;
     private OnPatternListener onPatternListener;
 
     public PatternView(Context context) {
         super(context);
-        init();
+        init(context);
     }
 
     public PatternView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context);
     }
 
     public PatternView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context);
     }
 
-    private void init() {
+    private void init(Context context) {
         paint = new Paint();
         paint.setColor(0xFF000000); // Siyah renk
         paint.setStrokeWidth(LINE_WIDTH);
         paint.setStyle(Paint.Style.STROKE);
         paint.setAntiAlias(true);
+        paint.setPathEffect(new DashPathEffect(new float[]{10, 20}, 0)); // Kesik çizgi efekti
+
         points = new ArrayList<>();
         selectedPoints = new ArrayList<>();
         path = new Path();
+
+        // Meyve ikonlarını yükleyin
+        fruitIcons = new Drawable[9];
+        fruitIcons[0] = ContextCompat.getDrawable(context, R.drawable.apple);
+        fruitIcons[1] = ContextCompat.getDrawable(context, R.drawable.banana);
+        fruitIcons[2] = ContextCompat.getDrawable(context, R.drawable.cherry);
+        fruitIcons[3] = ContextCompat.getDrawable(context, R.drawable.grape);
+        fruitIcons[4] = ContextCompat.getDrawable(context, R.drawable.lemon);
+        fruitIcons[5] = ContextCompat.getDrawable(context, R.drawable.orange);
+        fruitIcons[6] = ContextCompat.getDrawable(context, R.drawable.peach);
+        fruitIcons[7] = ContextCompat.getDrawable(context, R.drawable.strawberry);
+        fruitIcons[8] = ContextCompat.getDrawable(context, R.drawable.watermelon);
+
+        fruitIndex = new int[9];
+        shuffleFruitIcons();
     }
 
     @Override
@@ -55,6 +81,7 @@ public class PatternView extends View {
     }
 
     private void initPoints(int viewWidth, int viewHeight) {
+        points.clear();
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 points.add(new Point((i + 1) * (viewWidth / (GRID_SIZE + 1)), (j + 1) * (viewHeight / (GRID_SIZE + 1))));
@@ -62,17 +89,34 @@ public class PatternView extends View {
         }
     }
 
+    private void shuffleFruitIcons() {
+        List<Integer> iconIndices = new ArrayList<>();
+        for (int i = 0; i < fruitIcons.length; i++) {
+            iconIndices.add(i);
+        }
+        Collections.shuffle(iconIndices);
+        for (int i = 0; i < fruitIcons.length; i++) {
+            fruitIndex[i] = iconIndices.get(i);
+        }
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        drawPoints(canvas);
+        drawIcons(canvas);
         drawPath(canvas);
     }
 
-    private void drawPoints(Canvas canvas) {
-        for (Point point : points) {
-            paint.setStyle(selectedPoints.contains(point) ? Paint.Style.FILL : Paint.Style.STROKE);
-            canvas.drawCircle(point.x, point.y, POINT_RADIUS, paint);
+    private void drawIcons(Canvas canvas) {
+        for (int i = 0; i < points.size(); i++) {
+            Point point = points.get(i);
+            Drawable icon = fruitIcons[fruitIndex[i]];
+            int left = (int) (point.x - ICON_SIZE / 2);
+            int top = (int) (point.y - ICON_SIZE / 2);
+            int right = (int) (point.x + ICON_SIZE / 2);
+            int bottom = (int) (point.y + ICON_SIZE / 2);
+            icon.setBounds(left, top, right, bottom);
+            icon.draw(canvas);
         }
     }
 
@@ -118,7 +162,7 @@ public class PatternView extends View {
 
     private Point getSelectedPoint(float x, float y) {
         for (Point point : points) {
-            if (Math.sqrt(Math.pow((point.x - x), 2) + Math.pow((point.y - y), 2)) <= POINT_RADIUS) {
+            if (Math.sqrt(Math.pow((point.x - x), 2) + Math.pow((point.y - y), 2)) <= ICON_SIZE / 2) {
                 return point;
             }
         }
@@ -128,7 +172,7 @@ public class PatternView extends View {
     public String getPattern() {
         StringBuilder patternBuilder = new StringBuilder();
         for (Point point : selectedPoints) {
-            patternBuilder.append(points.indexOf(point));
+            patternBuilder.append(fruitIndex[points.indexOf(point)]);
         }
         return patternBuilder.toString();
     }
